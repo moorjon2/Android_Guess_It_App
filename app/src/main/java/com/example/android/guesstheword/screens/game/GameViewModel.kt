@@ -1,22 +1,37 @@
 package com.example.android.guesstheword.screens.game
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class GameViewModel: ViewModel() {
+    // TODO (01) Wra word and score in MutableLiveData
     // The current word
-    var word = ""
+    private val _word = MutableLiveData<String>()
+    val word : LiveData<String>
+        get() = _word
 
+    // TODO (02) Change references to score and word to score.value and word.value
     // The current score
-    var score = 0
+    private val _score = MutableLiveData<Int>()
+    val score : LiveData<Int>
+        get() = _score
 
     // The list of words - the front of the list is the next word to guess
     private lateinit var wordList: MutableList<String>
 
+    private val _eventGameFinish = MutableLiveData<Boolean>()
+    val eventGameFinished: LiveData<Boolean>
+        get() = _eventGameFinish
+
     init {
         Log.i("GameViewModel", "GameViewModel created!")
+        _eventGameFinish.value = false
         resetList()
         nextWord()
+        // TODO (03) Initialize score.value to 0
+        _score.value = 0
     }
 
     override fun onCleared() {
@@ -61,20 +76,26 @@ class GameViewModel: ViewModel() {
         //Select and remove a word from the list
         if (wordList.isEmpty()) {
             //gameFinished()
+            _eventGameFinish.value = true
         } else {
-            word = wordList.removeAt(0)
+            // Not sure about this word reference, will have to check back on it later
+            _word.value = wordList.removeAt(0)
         }
     }
 
     /** Methods for buttons presses **/
 
     fun onSkip() {
-        score--
+        _score.value = (score.value)?.minus(1)
         nextWord()
     }
 
     fun onCorrect() {
-        score++
+        _score.value = (score.value)?.plus(1)
         nextWord()
+    }
+
+    fun onGameFinishComplete() {
+        _eventGameFinish.value = false
     }
 }
